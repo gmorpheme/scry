@@ -1,0 +1,20 @@
+[package]
+name = "scry"
+version = "0.1.0"
+authors = ["gmorpheme <github@gmorpheme.net>"]
+edition = "2018"
+
+[dependencies]
+xml-rs = "0.8"
+rtf-grimoire = "0.1.1"
+quick-xml = { version = "0.20.0", features = [ "serialize" ] }
+serde = { version =  "1.0.121", features = [ "derive" ] }
+thiserror = "1.0.23"
+uuid = { version = "0.8.2", features = ["v4", "serde"] }
+log = "0.4.14"
+lazy_static = "1.4.0"
+encoding_rs = "0.8.26"
+codepage = "0.1.1"
+structopt = "0.3.21"
+itertools = "0.10.0"
+regex = "1.4.3"
