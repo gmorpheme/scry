@@ -31,10 +31,9 @@ fn try_main(opts: &options::Opt) -> Result<()> {
 
 /// Create an extractor based on command line options
 fn create_extractor(opts: &options::Opt) -> Result<extract::Extractor> {
-    // Find the project file
-    let scrivx = File::open(opts.project())?;
-    let directory = opts
-        .project()
+    let project_file = opts.project_file().ok_or(ScryError::CannotLocateScrivx)?;
+    let scrivx = File::open(&project_file)?;
+    let directory = project_file
         .parent()
         .ok_or(ScryError::CannotLocateBundle)?;
 

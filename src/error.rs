@@ -14,6 +14,8 @@ pub enum ScryError {
     XmlParse(#[from] DeError),
     #[error("unable to locate bundle containing project")]
     CannotLocateBundle,
+    #[error("unable to locate .scrivx project file")]
+    CannotLocateScrivx,
 }
 
 /// Scry result

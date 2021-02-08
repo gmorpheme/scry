@@ -1,6 +1,7 @@
-use crate::extract::{ContentSpec, FolderSpec};
 ///! Scry command line options
+use crate::extract::{ContentSpec, FolderSpec};
 use std::collections::HashSet;
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use structopt::StructOpt;
 
@@ -104,5 +105,30 @@ impl Opt {
             content_specs.insert(ContentSpec::Content);
         }
         content_specs
+    }
+
+    /// Find a .scrivx file in specified folder
+    fn find_scrivx_child(path: &Path) -> Option<PathBuf> {
+        let dir = path.read_dir().ok()?;
+
+        for entry in dir {
+            let f = entry.ok()?;
+            if f.path().extension() == Some(OsStr::new("scrivx")) {
+                return Some(f.path());
+            }
+        }
+
+        None
+    }
+
+    /// Identify the project file implied by the project argument
+    pub fn project_file(&self) -> Option<PathBuf> {
+        if self.project.is_file() {
+            Some(self.project.clone())
+        } else if self.project.is_dir() {
+            Self::find_scrivx_child(&self.project)
+        } else {
+            None
+        }
     }
 }
