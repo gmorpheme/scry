@@ -8,7 +8,6 @@
 ///!
 ///! Furthermore we may have split the "group" across several lines
 ///! during our RTF snipperation. So we have to be quite hacky here.
-use itertools;
 
 /// Adapted iterator that strips annotations from the underlying iterator
 pub fn skip_annotations<T>(source: T) -> AnnotationAdapter<T>
@@ -38,9 +37,9 @@ where
     output_annot: bool,
 }
 
-const OPEN: &'static str = r#"{\Scrv_annot"#;
-const OPEN_END: &'static str = r#"\text="#;
-const CLOSE: &'static str = r#"\end_Scrv_annot}"#;
+const OPEN: &str = r#"{\Scrv_annot"#;
+const OPEN_END: &str = r#"\text="#;
+const CLOSE: &str = r#"\end_Scrv_annot}"#;
 
 impl<T: Iterator<Item = String>> AnnotationAdapter<T> {
     /// Construct an annotation-sensitive iterator that outputs

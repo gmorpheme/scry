@@ -6,7 +6,7 @@
 ///! '<$ScrKeepWithNext><$Scr_H::1><$Scr_Ps::0>blah<!$Scr_H::1><!$Scr_Ps::0>'
 use regex::Regex;
 
-const SCRIVENER_TAG: &'static str = r#"<!?\$Scr.*?>"#;
+const SCRIVENER_TAG: &str = r#"<!?\$Scr.*?>"#;
 
 pub fn strip_tags(line: String) -> String {
     Regex::new(SCRIVENER_TAG).unwrap().replace_all(&line, "").into_owned()

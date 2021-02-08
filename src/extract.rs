@@ -76,7 +76,7 @@ impl ContentIterator {
     ) -> Self {
         ContentIterator {
             _uuid: uuid,
-            title: title,
+            title,
             folder: folder_content,
             content_specs: content_specs.clone(),
             iterator: None,

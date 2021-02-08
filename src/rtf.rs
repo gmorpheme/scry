@@ -422,7 +422,7 @@ impl Group {
         if let Some(dest) = self.current_destination() {
             self.array
                 .borrow_mut()
-                .write(dest, bytes, override_encoding.or(self.encoding()));
+                .write(dest, bytes, override_encoding.or_else(|| self.encoding()));
         }
     }
 }
