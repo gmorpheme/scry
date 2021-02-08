@@ -4,8 +4,8 @@ use crate::annot;
 use crate::bundle::BinderItemFolder;
 use crate::bundle::Bundle;
 use crate::rtf;
-use crate::tag;
 use crate::scrivx::{BinderItem, BinderItemType, BinderIterator, ScrivenerProject};
+use crate::tag;
 use std::collections::HashSet;
 use std::ffi::OsStr;
 use std::fs::File;
@@ -94,7 +94,9 @@ impl ContentIterator {
     }
 
     /// Create iterator over content paragraphs
-    fn content_paragraph_iterator(&self) -> Option<annot::AnnotationAdapter<rtf::ParagraphIterator>> {
+    fn content_paragraph_iterator(
+        &self,
+    ) -> Option<annot::AnnotationAdapter<rtf::ParagraphIterator>> {
         if let Some(path) = self.folder.content() {
             if path.extension() == Some(OsStr::new("rtf")) {
                 rtf::parse_rtf_file(path).ok().map(annot::skip_annotations)
@@ -107,7 +109,9 @@ impl ContentIterator {
     }
 
     /// Create iterator over inline annotations
-    fn content_annotation_iterator(&self) -> Option<annot::AnnotationAdapter<rtf::ParagraphIterator>> {
+    fn content_annotation_iterator(
+        &self,
+    ) -> Option<annot::AnnotationAdapter<rtf::ParagraphIterator>> {
         if let Some(path) = self.folder.content() {
             if path.extension() == Some(OsStr::new("rtf")) {
                 rtf::parse_rtf_file(path).ok().map(annot::only_annotations)
@@ -118,7 +122,6 @@ impl ContentIterator {
             None
         }
     }
-
 
     /// Create iterator over notes paragraphs
     fn notes_paragraph_iterator(&self) -> Option<rtf::ParagraphIterator> {

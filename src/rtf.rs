@@ -420,9 +420,11 @@ impl Group {
         override_encoding: Option<&'static encoding_rs::Encoding>,
     ) {
         if let Some(dest) = self.current_destination() {
-            self.array
-                .borrow_mut()
-                .write(dest, bytes, override_encoding.or_else(|| self.encoding()));
+            self.array.borrow_mut().write(
+                dest,
+                bytes,
+                override_encoding.or_else(|| self.encoding()),
+            );
         }
     }
 }
