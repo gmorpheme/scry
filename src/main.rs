@@ -33,9 +33,7 @@ fn try_main(opts: &options::Opt) -> Result<()> {
 fn create_extractor(opts: &options::Opt) -> Result<extract::Extractor> {
     let project_file = opts.project_file().ok_or(ScryError::CannotLocateScrivx)?;
     let scrivx = File::open(&project_file)?;
-    let directory = project_file
-        .parent()
-        .ok_or(ScryError::CannotLocateBundle)?;
+    let directory = project_file.parent().ok_or(ScryError::CannotLocateBundle)?;
 
     // Parse project
     let project = scrivx::ScrivenerProject::parse(scrivx)?;
