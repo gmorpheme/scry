@@ -77,7 +77,7 @@ jobs:
   release-linux:
     if: startsWith(github.ref, 'refs/tags/')
     needs: [check, test, fmt, clippy]
-    name: Release Build
+    name: Release Linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -99,5 +99,61 @@ jobs:
         with:
           files: |
             target/release/scry_amd64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-macos:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [check, test, fmt, clippy]
+    name: Release MacOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --release
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all --release
+      - run: strip target/release/scry && mv target/release/scry target/release/scry_darwin
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/release/scry_darwin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-windows:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [check, test, fmt, clippy]
+    name: Release Windows
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --release
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all --release
+      - run: strip target/release/scry && mv target/release/scry target/release/scry.exe
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/release/scry.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
