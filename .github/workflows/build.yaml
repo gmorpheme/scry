@@ -96,6 +96,7 @@ jobs:
           args: --all --release
       - run: strip target/release/scry && mv target/release/scry target/release/scry_amd64
       - uses: softprops/action-gh-release@v1
+        draft: true
         with:
           files: |
             target/release/scry_amd64
@@ -124,6 +125,7 @@ jobs:
           args: --all --release
       - run: strip target/release/scry && mv target/release/scry target/release/scry_darwin
       - uses: softprops/action-gh-release@v1
+        draft: true
         with:
           files: |
             target/release/scry_darwin
@@ -152,6 +154,7 @@ jobs:
           args: --all --release
       - run: strip target/release/scry && mv target/release/scry target/release/scry.exe
       - uses: softprops/action-gh-release@v1
+        draft: true
         with:
           files: |
             target/release/scry.exe
