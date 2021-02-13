@@ -66,7 +66,7 @@ jobs:
 
   release-linux:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [build, test, fmt, clippy]
+    needs: [check, test, fmt, clippy]
     name: Release Build
     runs-on: ubuntu-latest
     steps:
