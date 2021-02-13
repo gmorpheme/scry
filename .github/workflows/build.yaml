@@ -1,40 +1,93 @@
+on: [push, pull_request]
+
 name: scry pipeline
 
-on:
-  push:
-    branches: master
-
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
-  build:
+  check:
+    name: Check
     runs-on: ubuntu-latest
-
     steps:
-
       - uses: actions/checkout@v2
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
       - uses: actions-rs/toolchain@v1
         with:
+          profile: minimal
           toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
 
-      - name: Check style
-        run: cargo fmt --all -- --check
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
 
-      - name: Lint
-        run: cargo clippy --all-targets -- -D clippy::all
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
 
-      - name: Run tests
-        run: cargo test
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add clippy
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
 
-      - name: Build
-        run: cargo build --release
+
+  release-linux:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [check, test, fmt, clippy]
+    name: Release Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --release
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all --release
+      - run: strip target/release/scry && mv target/release/scry target/release/scry_amd64
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/release/scry_amd64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
