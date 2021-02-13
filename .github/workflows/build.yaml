@@ -96,10 +96,10 @@ jobs:
           args: --all --release
       - run: strip target/release/scry && mv target/release/scry target/release/scry_amd64
       - uses: softprops/action-gh-release@v1
-        draft: true
         with:
           files: |
             target/release/scry_amd64
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -125,10 +125,10 @@ jobs:
           args: --all --release
       - run: strip target/release/scry && mv target/release/scry target/release/scry_darwin
       - uses: softprops/action-gh-release@v1
-        draft: true
         with:
           files: |
             target/release/scry_darwin
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -154,9 +154,9 @@ jobs:
           args: --all --release
       - run: strip target/release/scry && mv target/release/scry target/release/scry.exe
       - uses: softprops/action-gh-release@v1
-        draft: true
         with:
           files: |
             target/release/scry.exe
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
