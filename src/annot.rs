@@ -33,7 +33,7 @@ where
     /// Line source
     source: itertools::PutBack<T>,
     /// Whether we are in an annotation at the start of the next line
-    in_annot: bool,
+    in_annotation: bool,
     /// Whether to forward on normal content
     output_content: bool,
     /// Whether to forward on annotation content
@@ -50,7 +50,7 @@ impl<T: Iterator<Item = String>> AnnotationAdapter<T> {
     pub fn new(source: T, output_content: bool, output_annot: bool) -> Self {
         AnnotationAdapter {
             source: itertools::put_back(source),
-            in_annot: false,
+            in_annotation: false,
             output_content,
             output_annot,
         }
@@ -62,10 +62,10 @@ impl<T: Iterator<Item = String>> AnnotationAdapter<T> {
     /// None does not indicate an exhausted iterator but a chunk
     /// incompatible with output settings
     fn take_chunk<'a>(&mut self, line: &'a str) -> Option<&'a str> {
-        if self.in_annot {
+        if self.in_annotation {
             let annot = match line.find(CLOSE) {
                 Some(idx) => {
-                    self.in_annot = false;
+                    self.in_annotation = false;
                     self.source
                         .put_back((&line[(idx + CLOSE.len())..]).to_string());
                     &line[..idx]
@@ -84,7 +84,7 @@ impl<T: Iterator<Item = String>> AnnotationAdapter<T> {
                     let end = line
                         .find(OPEN_END)
                         .expect("Unsupported: annotation split open across lines");
-                    self.in_annot = true;
+                    self.in_annotation = true;
                     self.source
                         .put_back((&line[(end + OPEN_END.len())..]).to_string());
                     &line[..start]

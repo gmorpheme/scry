@@ -235,7 +235,7 @@ impl Extractor {
             .binder
             .binder_items
             .iter()
-            .filter(|it| self.folder_specs.iter().any(|spec| matches(&it, &spec)))
+            .filter(|it| self.folder_specs.iter().any(|spec| matches(it, spec)))
             .collect();
 
         BinderIterator::new(roots)

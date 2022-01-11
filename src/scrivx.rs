@@ -30,7 +30,7 @@ impl ScrivenerProject {
         from_reader(r)
     }
 
-    /// An iterator over all iterms in the project's binder
+    /// An iterator over all items in the project's binder
     pub fn iter(&self) -> BinderIterator {
         BinderIterator::new(self.binder.binder_items.iter().collect())
     }

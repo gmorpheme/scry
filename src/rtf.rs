@@ -65,11 +65,7 @@ impl<T: Iterator<Item = Token>> Iterator for Snipperator<T> {
             return self.next();
         }
 
-        if let Some(line) = self.rtf_queue.borrow_mut().flush() {
-            Some(line)
-        } else {
-            None
-        }
+        self.rtf_queue.borrow_mut().flush()
     }
 }
 
@@ -269,9 +265,9 @@ impl SnippetEngine {
         let mut sym_bytes = [0; 4];
         let sym_str = symbol.encode_utf8(&mut sym_bytes);
 
-        if let Some(mut group) = self.group_stack.last_mut() {
+        if let Some(group) = self.group_stack.last_mut() {
             if let Some(handler) = SYMBOLS.get(sym_str) {
-                handler(&mut group, sym_str, None);
+                handler(group, sym_str, None);
             } else if !word_is_optional {
                 // TODO: error
             }
@@ -280,9 +276,9 @@ impl SnippetEngine {
 
     /// Handle a control word
     fn do_control_word(&mut self, name: &str, arg: Option<i32>, word_is_optional: bool) {
-        if let Some(mut group) = self.group_stack.last_mut() {
+        if let Some(group) = self.group_stack.last_mut() {
             if let Some(handler) = handler(name) {
-                handler(&mut group, name, arg);
+                handler(group, name, arg);
             } else if !word_is_optional {
                 // TODO: error
             }
@@ -2401,11 +2397,10 @@ fn control_value_set_state_default(state: &mut Group, name: &str, arg: Option<i3
 }
 
 fn control_value_set_state_encoding(state: &mut Group, name: &str, arg: Option<i32>) {
-    match name {
-        "ansicpg" => state.set_codepage(arg.unwrap_or(1252i32) as u16),
-        _ => {
-            panic!("Programmer error: {} was indicated as an encoding-related control value, without adding an encoding mapping for it.", name)
-        }
+    if let "ansicpg" = name {
+        state.set_codepage(arg.unwrap_or(1252i32) as u16)
+    } else {
+        panic!("Programmer error: {} was indicated as an encoding-related control value, without adding an encoding mapping for it.", name)
     }
 
     state.set_value(name, arg);
@@ -2443,8 +2438,8 @@ fn control_symbol_write_ansi_char(state: &mut Group, name: &str, arg: Option<i32
         "rdblquote" => Some(b"\x94"), // Pre-defined ANSI mapping in spec
         "rquote" => Some(b"\x92"),    // Pre-defined ANSI mapping in spec
         "sect" => Some(b"\n\n"),
-        "tab" => Some(b"\t"),
-        "row" => Some(b"\n "),  // Unofficial mapping for ending a table row
+        "row" => Some(b"\n "),
+        "tab" => Some(b"\t"),   // Unofficial mapping for ending a table row
         "cell" => Some(b"\t"),  // Unofficial mapping for separating table row cells
         "ls" => Some(b"\x95 "), // Unofficial mapping for list entry
         "\n" => Some(b"\n"),    // Semi-official compatibility mapping, same as \par
@@ -2458,7 +2453,7 @@ fn control_symbol_write_ansi_char(state: &mut Group, name: &str, arg: Option<i32
     };
 
     if let Some(bytes) = opt_bytes {
-        state.write(&bytes, None);
+        state.write(bytes, None);
     }
 }
 

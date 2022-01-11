@@ -50,14 +50,12 @@ impl Bundle {
 
 /// Find the content file under `folder` if it exists
 fn find_content(folder: &Path) -> Option<PathBuf> {
-    for f in folder.read_dir().ok()? {
-        if let Ok(entry) = f {
-            let path = entry.path();
-            let stem = path.file_stem();
-            let ext = path.extension();
-            if stem == Some(OsStr::new("content")) && ext != Some(OsStr::new("comments")) {
-                return Some(entry.path());
-            }
+    for entry in folder.read_dir().ok()?.flatten() {
+        let path = entry.path();
+        let stem = path.file_stem();
+        let ext = path.extension();
+        if stem == Some(OsStr::new("content")) && ext != Some(OsStr::new("comments")) {
+            return Some(entry.path());
         }
     }
     None
