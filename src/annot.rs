@@ -1,13 +1,13 @@
-///! Iterator adaptor to handle Scrivener's ugly annotation tags
-///!
-///! They're kind of another layer of RTF-like syntax embedded in the
-///! text that the RTF specifies (so escaped in the eventual RTF).
-///! However, the control words are invalid (containing underscores
-///! and equals) so they can't be tokenised by a standard RTF
-///! tokeniser.
-///!
-///! Furthermore we may have split the "group" across several lines
-///! during our RTF snipperation. So we have to be quite hacky here.
+//! Iterator adaptor to handle Scrivener's ugly annotation tags
+//!
+//! They're kind of another layer of RTF-like syntax embedded in the
+//! text that the RTF specifies (so escaped in the eventual RTF).
+//! However, the control words are invalid (containing underscores
+//! and equals) so they can't be tokenised by a standard RTF
+//! tokeniser.
+//!
+//! Furthermore we may have split the "group" across several lines
+//! during our RTF snipperation. So we have to be quite hacky here.
 
 /// Adapted iterator that strips annotations from the underlying iterator
 pub fn skip_annotations<T>(source: T) -> AnnotationAdapter<T>

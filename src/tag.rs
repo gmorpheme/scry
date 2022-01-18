@@ -1,9 +1,9 @@
-///! Adaptation for stripping style tags form Scrivener content
-///!
-///! Tags are the style related elements like the following that
-///! Scrivener inserts into the RTF:
-///!
-///! '<$ScrKeepWithNext><$Scr_H::1><$Scr_Ps::0>blah<!$Scr_H::1><!$Scr_Ps::0>'
+//! Adaptation for stripping style tags form Scrivener content
+//!
+//! Tags are the style related elements like the following that
+//! Scrivener inserts into the RTF:
+//!
+//! '<$ScrKeepWithNext><$Scr_H::1><$Scr_Ps::0>blah<!$Scr_H::1><!$Scr_Ps::0>'
 use regex::Regex;
 
 const SCRIVENER_TAG: &str = r#"<!?\$Scr.*?>"#;

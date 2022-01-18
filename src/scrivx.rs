@@ -1,4 +1,4 @@
-///! Representation and parsing of .scrivx project files
+//! Representation and parsing of .scrivx project files
 use quick_xml::de::{from_reader, DeError};
 use serde::{Deserialize, Deserializer};
 use std::io::{BufReader, Read};

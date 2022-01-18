@@ -1,4 +1,4 @@
-///! Scry command line options
+//! Scry command line options
 use crate::extract::{ContentSpec, FolderSpec};
 use std::collections::HashSet;
 use std::ffi::OsStr;

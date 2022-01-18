@@ -1,6 +1,6 @@
-///! Machinery for parsing RTF files
-///!
-///! This is heavily based on / stolen from https://github.com/compenguy/rtf2text
+//! Machinery for parsing RTF files
+//!
+//! This is heavily based on / stolen from https://github.com/compenguy/rtf2text
 use crate::error::Result;
 use lazy_static::lazy_static;
 use rtf_grimoire::tokenizer::{parse, Token};

@@ -1,5 +1,5 @@
-///! The main extraction machinery including ContentIterator for
-///! iterating over lines / paragraphs in a ScrivenerProject.
+//! The main extraction machinery including ContentIterator for
+//! iterating over lines / paragraphs in a ScrivenerProject.
 use crate::annot;
 use crate::bundle::BinderItemFolder;
 use crate::bundle::Bundle;

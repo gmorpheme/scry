@@ -1,4 +1,4 @@
-///! The file system directory structure for a scrivener project
+//! The file system directory structure for a scrivener project
 use std::convert::AsRef;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};

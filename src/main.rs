@@ -1,4 +1,4 @@
-///! Scry mainline - parse and extract text snippets from Scrivener project
+//! Scry mainline - parse and extract text snippets from Scrivener project
 use std::fs::File;
 use structopt::StructOpt;
 
