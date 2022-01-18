@@ -484,11 +484,11 @@ lazy_static! {
     m.insert("ffl", Box::new(destination_control_set_state_default));
     m.insert("ffname", Box::new(destination_control_set_state_default));
     m.insert("ffstattext", Box::new(destination_control_set_state_default));
-    m.insert("field", Box::new(destination_control_set_state_default));
+    m.insert("field", Box::new(control_word_ignore));
     m.insert("file", Box::new(destination_control_set_state_default));
     m.insert("filetbl", Box::new(destination_control_set_state_default));
     m.insert("fldinst", Box::new(destination_control_set_state_default));
-    m.insert("fldrslt", Box::new(destination_control_set_state_default));
+    m.insert("fldrslt", Box::new(control_word_ignore));
     m.insert("fldtype", Box::new(destination_control_set_state_default));
     m.insert("fname", Box::new(destination_control_set_state_default));
     m.insert("fontemb", Box::new(destination_control_set_state_default));
@@ -2492,4 +2492,21 @@ fn destination_control_and_value_set_state_default(
 }
 
 #[cfg(test)]
-pub mod test {}
+pub mod test {
+
+    use super::*;
+
+    #[test]
+    pub fn test_comment() {
+        let source = r#"{\rtf1\ansi\ansicpg1252\cocoartf2578
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Palatino-Roman;\f1\froman\fcharset0 Palatino-Italic;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\pard\tx360\tx720\tx1080\tx1440\tx1800\tx2160\tx2880\tx3600\tx4320\fi360\sl264\slmult1\pardirnatural\partightenfactor0
+
+\f0\fs26 \cf0 This is commented-on {\field{\*\fldinst{HYPERLINK "scrivcmt://3320CF04-2AE2-4D08-A1A4-3A5CFB9F43A6"}}{\fldrslt text}}.\
+}"#.as_bytes();
+        let lines: Vec<String> = parse_rtf(source).unwrap().collect();
+        assert_eq!(lines, vec!["This is commented-on text."]);
+    }
+}
