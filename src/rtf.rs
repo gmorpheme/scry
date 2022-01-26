@@ -69,7 +69,7 @@ impl<T: Iterator<Item = Token>> Iterator for Snipperator<T> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Destination {
     Text(String),
     Bytes(Vec<u8>),
@@ -95,16 +95,23 @@ impl Destination {
 
 /// Destination protocol
 pub trait DestinationArray {
+    fn destinations(&self) -> Vec<String>;
     /// Ceate a new text destination
     fn create_text(&mut self, name: &str);
     /// Ceate a new bytes destination
     fn create_bytes(&mut self, name: &str);
     /// Write bytes to destination
     fn write(&mut self, name: &str, bytes: &[u8], encoding: Option<&'static encoding_rs::Encoding>);
+    /// Read text from destination if available
+    fn read_text(
+        &self,
+        name: &str,
+        encoding: Option<&'static encoding_rs::Encoding>,
+    ) -> Option<String>;
 }
 
 /// A destination array that stores and writes to Destinations
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct BasicDestinationArray {
     dests: HashMap<String, Destination>,
 }
@@ -151,6 +158,22 @@ impl DestinationArray for BasicDestinationArray {
             }
         }
     }
+
+    /// Read text from named destination
+    fn read_text(
+        &self,
+        name: &str,
+        encoding: Option<&'static encoding_rs::Encoding>,
+    ) -> Option<String> {
+        self.dests.get(name).and_then(|dest| match dbg!(dest) {
+            Destination::Text(s) => Some(s.clone()),
+            Destination::Bytes(bs) => encoding.map(|enc| enc.decode(bs).0.to_string()),
+        })
+    }
+
+    fn destinations(&self) -> Vec<String> {
+        self.dests.keys().cloned().collect()
+    }
 }
 
 /// A destination array that stores rtf lines in a queue from which
@@ -187,6 +210,10 @@ impl RtfQueueDestinationArray {
 }
 
 impl DestinationArray for RtfQueueDestinationArray {
+    fn destinations(&self) -> Vec<String> {
+        self.basic.destinations()
+    }
+
     fn create_text(&mut self, name: &str) {
         if name != "rtf" {
             self.basic.create_text(name);
@@ -223,6 +250,14 @@ impl DestinationArray for RtfQueueDestinationArray {
         } else {
             self.basic.write(name, bytes, encoding);
         }
+    }
+
+    fn read_text(
+        &self,
+        name: &str,
+        encoding: Option<&'static encoding_rs::Encoding>,
+    ) -> Option<String> {
+        self.basic.read_text(name, encoding)
     }
 }
 
@@ -305,7 +340,18 @@ impl SnippetEngine {
 
     /// Close top group
     fn close_group(&mut self) {
-        self.group_stack.pop();
+        // if a field result destination has been populated, we pass
+        // that text to the parent group
+        if let Some(top) = self.group_stack.pop() {
+            dbg!(top.array.borrow().destinations());
+            if let Some(text) = top.read_text("fldrslt") {
+                if let Some(enc) = top.current_encoding {
+                    self.write(&enc.encode(text.as_str()).0);
+                } else {
+                    self.write(text.as_bytes());
+                }
+            }
+        }
     }
 
     /// Consume a token
@@ -423,6 +469,11 @@ impl Group {
             );
         }
     }
+
+    /// Read text from named destination if posible
+    fn read_text(&self, name: &str) -> Option<String> {
+        self.array.borrow().read_text(name, self.current_encoding)
+    }
 }
 
 // RTF_CONTROL
@@ -484,11 +535,11 @@ lazy_static! {
     m.insert("ffl", Box::new(destination_control_set_state_default));
     m.insert("ffname", Box::new(destination_control_set_state_default));
     m.insert("ffstattext", Box::new(destination_control_set_state_default));
-    m.insert("field", Box::new(control_word_ignore));
+    m.insert("field", Box::new(destination_control_set_state_default));
     m.insert("file", Box::new(destination_control_set_state_default));
     m.insert("filetbl", Box::new(destination_control_set_state_default));
     m.insert("fldinst", Box::new(destination_control_set_state_default));
-    m.insert("fldrslt", Box::new(control_word_ignore));
+    m.insert("fldrslt", Box::new(destination_control_set_state_default));
     m.insert("fldtype", Box::new(destination_control_set_state_default));
     m.insert("fname", Box::new(destination_control_set_state_default));
     m.insert("fontemb", Box::new(destination_control_set_state_default));
