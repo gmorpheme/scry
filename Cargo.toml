@@ -1,21 +1,21 @@
 [package]
 name = "scry"
-version = "0.1.0"
+version = "0.0.2"
 authors = ["gmorpheme <github@gmorpheme.net>"]
 edition = "2018"
 
 [dependencies]
 xml-rs = "0.8.4"
 rtf-grimoire = "0.1.1"
-quick-xml = { version = "0.22.0", features = [ "serialize" ] }
-serde = { version = "1.0.133", features = [ "derive" ] }
-thiserror = "1.0.30"
-uuid = { version = "0.8.2", features = ["v4", "serde"] }
-log = "0.4.14"
+quick-xml = { version = "0.23.0", features = [ "serialize" ] }
+serde = { version = "1.0.139", features = [ "derive" ] }
+thiserror = "1.0.31"
+uuid = { version = "1.1.2", features = ["v4", "serde"] }
+log = "0.4.17"
 lazy_static = "1.4.0"
-encoding_rs = "0.8.30"
+encoding_rs = "0.8.31"
 codepage = "0.1.1"
-structopt = "0.3.25"
+structopt = "0.3.26"
 itertools = "0.10.3"
-regex = "1.5.4"
+regex = "1.6.0"
 json = "0.12.4"

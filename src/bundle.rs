@@ -35,7 +35,7 @@ impl Bundle {
         path.push("Data");
         path.push(
             binder_item
-                .to_hyphenated_ref()
+                .as_hyphenated()
                 .encode_upper(&mut Uuid::encode_buffer()),
         );
         path
