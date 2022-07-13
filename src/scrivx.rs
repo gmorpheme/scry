@@ -1,7 +1,10 @@
 //! Representation and parsing of .scrivx project files
 use quick_xml::de::{from_reader, DeError};
 use serde::{Deserialize, Deserializer};
-use std::io::{BufReader, Read};
+use std::{
+    fmt,
+    io::{BufReader, Read},
+};
 use uuid::Uuid;
 
 /// Top level project element
@@ -67,6 +70,22 @@ pub enum BinderItemType {
     WebArchive,
     /// Other content type
     Other,
+}
+
+impl fmt::Display for BinderItemType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            BinderItemType::DraftFolder => write!(f, "DraftFolder"),
+            BinderItemType::ResearchFolder => write!(f, "ResearchFolder"),
+            BinderItemType::TrashFolder => write!(f, "TrashFolder"),
+            BinderItemType::Folder => write!(f, "Folder"),
+            BinderItemType::Text => write!(f, "Text"),
+            BinderItemType::PDF => write!(f, "PDF"),
+            BinderItemType::Image => write!(f, "Image"),
+            BinderItemType::WebArchive => write!(f, "WebArchive"),
+            BinderItemType::Other => write!(f, "Other"),
+        }
+    }
 }
 
 impl Default for BinderItemType {

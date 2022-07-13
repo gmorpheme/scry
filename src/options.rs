@@ -56,11 +56,19 @@ pub struct Opt {
     /// (containing a .scrivx file)
     #[structopt(name = "PROJECT")]
     project: PathBuf,
+
+    /// Maintain item structure and UUIDs (not hierarchy)
+    #[structopt(short = "I", long)]
+    itemise: bool,
 }
 
 impl Opt {
     pub fn project(&self) -> &Path {
         &self.project
+    }
+
+    pub fn itemise(&self) -> bool {
+        self.itemise
     }
 
     /// Return the folders to include in the output

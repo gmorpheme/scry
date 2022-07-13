@@ -1,19 +1,29 @@
-//! The main extraction machinery including ContentIterator for
-//! iterating over lines / paragraphs in a ScrivenerProject.
+//! A set of extraction machinery including
+//!
+//! - ContentIterator for iterating over lines / paragraphs
+//! - Extractor for extracting textual content from a project
+//! - JsonItemiser for outputing item data as JSON
+//!
+
 use crate::annot;
 use crate::bundle::BinderItemFolder;
 use crate::bundle::Bundle;
+use crate::error::ScryError;
 use crate::rtf;
 use crate::scrivx::{BinderItem, BinderItemType, BinderIterator, ScrivenerProject};
 use crate::tag;
-use std::collections::HashSet;
-use std::ffi::OsStr;
-use std::fs::File;
-use std::io::{self, BufRead};
+use std::{
+    collections::HashSet,
+    ffi::OsStr,
+    fs::File,
+    io::{self, stdout, BufRead, Read},
+};
 use uuid::Uuid;
 
+use json::JsonValue;
+
 /// Specifies folders to extract
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub enum FolderSpec {
     /// The draft folder
     DraftFolder,
@@ -36,6 +46,21 @@ fn matches(item: &BinderItem, folder_spec: &FolderSpec) -> bool {
         FolderSpec::NamedFolder(ref s) => &item.title == s,
         FolderSpec::Any => item.r#type != BinderItemType::TrashFolder,
     }
+}
+
+/// Create a binder iterator from a project and set of folder specifications
+pub fn binder_iterator(
+    project: &ScrivenerProject,
+    folder_specs: HashSet<FolderSpec>,
+) -> BinderIterator {
+    let roots: Vec<_> = project
+        .binder
+        .binder_items
+        .iter()
+        .filter(|it| folder_specs.iter().any(|spec| matches(it, spec)))
+        .collect();
+
+    BinderIterator::new(roots)
 }
 
 /// Specifies content type to extract for each item
@@ -203,7 +228,12 @@ impl Iterator for ContentIterator {
     }
 }
 
-/// Extracts content from scrivener project
+/// Extracts pure textual content from Scrivener Project
+///
+/// All structure is eradicted and the output is a flat list of
+/// strings. The content types and folders that are included are
+/// specified. RTF data is split into paragraphs, plain text into
+/// lines. No UUIDs or non-textual data is included.
 pub struct Extractor {
     /// The Scrivener project file
     project: ScrivenerProject,
@@ -231,22 +261,13 @@ impl Extractor {
         }
     }
 
-    /// Create a binder iterator using configured folder specs
-    fn binder_iterator(&self) -> BinderIterator {
-        let roots: Vec<_> = self
-            .project
-            .binder
-            .binder_items
-            .iter()
-            .filter(|it| self.folder_specs.iter().any(|spec| matches(it, spec)))
-            .collect();
-
-        BinderIterator::new(roots)
-    }
-
     /// Return an iterator over all selected content
     pub fn iter(&self) -> ExtractionIterator {
-        ExtractionIterator::new(&self.bundle, self.binder_iterator(), &self.content_specs)
+        ExtractionIterator::new(
+            &self.bundle,
+            binder_iterator(&self.project, self.folder_specs.clone()),
+            &self.content_specs,
+        )
     }
 }
 
@@ -312,5 +333,98 @@ impl<'a> Iterator for ExtractionIterator<'a> {
         } else {
             None
         }
+    }
+}
+
+/// Outputs flat list of structured items to stdout as JSON.
+///
+/// Internal item structure is preserved but binder structure is
+/// collapsed into a depth first listing.
+///
+/// (no need to abstract, no need to stream for now)
+pub struct JsonItemiser {
+    /// content items to include in JSON
+    content_specs: HashSet<ContentSpec>,
+    /// items accumulated so far
+    items: Vec<JsonValue>,
+}
+
+impl JsonItemiser {
+    /// Create a new itemiser to output the content types specified
+    pub fn new(content_specs: HashSet<ContentSpec>) -> Self {
+        JsonItemiser {
+            items: vec![],
+            content_specs,
+        }
+    }
+
+    /// Accept a binder item and massage into JSON object
+    pub fn consume_item(
+        &mut self,
+        item: &BinderItem,
+        folder: &BinderItemFolder,
+    ) -> Result<(), ScryError> {
+        let mut object = JsonValue::new_object();
+        // x-scrivener-item links need uppercase GUIDS - might as well
+        // ensure it here:
+        object.insert("uuid", item.uuid.to_string().to_ascii_uppercase())?;
+        object.insert("type", item.r#type.to_string())?;
+
+        if self.content_specs.contains(&ContentSpec::Title) {
+            object.insert("title", item.title.clone())?;
+        }
+
+        if self.content_specs.contains(&ContentSpec::Synopsis) {
+            if let Some(path) = folder.synopsis() {
+                let file = File::open(path)?;
+                let mut content = String::new();
+                io::BufReader::new(file).read_to_string(&mut content)?;
+                object.insert("synopsis", content)?;
+            }
+        }
+
+        if self.content_specs.contains(&ContentSpec::Content) {
+            if let Some(path) = folder.content() {
+                if path.extension() == Some(OsStr::new("rtf")) {
+                    let content: Vec<String> =
+                        annot::skip_annotations(rtf::parse_rtf_file(path)?).collect();
+                    object.insert("content", content)?;
+                }
+            }
+        }
+
+        if self.content_specs.contains(&ContentSpec::Inlines) {
+            if let Some(path) = folder.content() {
+                if path.extension() == Some(OsStr::new("rtf")) {
+                    let content: Vec<String> =
+                        annot::only_annotations(rtf::parse_rtf_file(path)?).collect();
+                    object.insert("inlines", content)?;
+                }
+            }
+        }
+
+        if self.content_specs.contains(&ContentSpec::Notes) {
+            if let Some(path) = folder.notes() {
+                if path.extension() == Some(OsStr::new("rtf")) {
+                    let content: Vec<String> = rtf::parse_rtf_file(path)?.collect();
+                    object.insert("notes", content)?;
+                }
+            }
+        }
+
+        if self.content_specs.contains(&ContentSpec::Comments) {
+            // TODO: comments
+        }
+
+        self.items.push(object);
+        Ok(())
+    }
+
+    /// Wrap in an { "items": [...] } object and dump to stdout
+    pub fn write_to_stdout(self) -> Result<(), ScryError> {
+        let mut wrapper = JsonValue::new_object();
+        wrapper.insert("items", self.items)?;
+        wrapper.write(&mut stdout())?;
+        Ok(())
     }
 }
