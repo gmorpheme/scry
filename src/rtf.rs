@@ -165,7 +165,7 @@ impl DestinationArray for BasicDestinationArray {
         name: &str,
         encoding: Option<&'static encoding_rs::Encoding>,
     ) -> Option<String> {
-        self.dests.get(name).and_then(|dest| match dbg!(dest) {
+        self.dests.get(name).and_then(|dest| match dest {
             Destination::Text(s) => Some(s.clone()),
             Destination::Bytes(bs) => encoding.map(|enc| enc.decode(bs).0.to_string()),
         })
@@ -343,7 +343,6 @@ impl SnippetEngine {
         // if a field result destination has been populated, we pass
         // that text to the parent group
         if let Some(top) = self.group_stack.pop() {
-            dbg!(top.array.borrow().destinations());
             if let Some(text) = top.read_text("fldrslt") {
                 if let Some(enc) = top.current_encoding {
                     self.write(&enc.encode(text.as_str()).0);
