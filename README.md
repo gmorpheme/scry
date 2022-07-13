@@ -17,6 +17,8 @@ elsewhere on github...).
 scry -h
 ```
 
+You can specify either the `.scriv` bundle or the `.scrivx` project file.
+
 By default `scry`` extracts all paragraphs from the _draft_ folder of the
 project, stripping RTF controls and other artefacts of Scrivener
 styling and annotation.
@@ -27,7 +29,7 @@ bits of text. For example:
 Inline annotations and notes from the draft folder:
 
 ```
-scry proj.scrivx -in
+scry proj.scrivx -i -n
 ```
 
 Content from the research folder:
@@ -35,6 +37,11 @@ Content from the research folder:
 ```
 scry proj.scrivx -r
 ```
+
+To select all top-level binder folders (except trash), use `-A`.
+
+To output the items as JSON for further processing (i.e. maintaining
+some internal item structure but no binder structure), use `-I`.
 
 ## Acknowledgement
 
