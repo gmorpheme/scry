@@ -1,3 +1,4 @@
+use json;
 use quick_xml::DeError;
 use rtf_grimoire::tokenizer::ParseError;
 use std::io;
@@ -12,6 +13,8 @@ pub enum ScryError {
     RtfParse(ParseError),
     #[error("failed to parse XML: {0}")]
     XmlParse(#[from] DeError),
+    #[error("failed to format JSON: {0}")]
+    JsonError(#[from] json::Error),
     #[error("unable to locate bundle containing project")]
     CannotLocateBundle,
     #[error("unable to locate .scrivx project file")]
