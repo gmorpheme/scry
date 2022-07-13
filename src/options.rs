@@ -20,6 +20,10 @@ pub struct Opt {
     #[structopt(long)]
     trash: bool,
 
+    /// Include all top level folders except trash
+    #[structopt(short = "A", long = "all-folders")]
+    all: bool,
+
     /// Include top-level folder
     #[structopt(short = "F", long = "folder")]
     folders: Vec<String>,
@@ -73,6 +77,9 @@ impl Opt {
         }
         for s in &self.folders {
             folder_specs.insert(FolderSpec::NamedFolder(s.to_string()));
+        }
+        if self.all {
+            folder_specs.insert(FolderSpec::Any);
         }
         if folder_specs.is_empty() {
             folder_specs.insert(FolderSpec::DraftFolder);

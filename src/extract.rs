@@ -23,6 +23,8 @@ pub enum FolderSpec {
     TrashFolder,
     /// A named top-level folder
     NamedFolder(String),
+    /// Any top-level folder except trash (will match conflicts)
+    Any,
 }
 
 /// Returns true if item matches the folder spec
@@ -32,6 +34,7 @@ fn matches(item: &BinderItem, folder_spec: &FolderSpec) -> bool {
         FolderSpec::ResearchFolder => item.r#type == BinderItemType::ResearchFolder,
         FolderSpec::TrashFolder => item.r#type == BinderItemType::TrashFolder,
         FolderSpec::NamedFolder(ref s) => &item.title == s,
+        FolderSpec::Any => item.r#type != BinderItemType::TrashFolder,
     }
 }
 
