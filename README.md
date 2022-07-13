@@ -19,9 +19,10 @@ scry -h
 
 You can specify either the `.scriv` bundle or the `.scrivx` project file.
 
-By default `scry`` extracts all paragraphs from the _draft_ folder of the
-project, stripping RTF controls and other artefacts of Scrivener
-styling and annotation.
+By default `scry`` extracts all content paragraphs from the _draft_
+folder of the project, stripping RTF controls and other artefacts of
+Scrivener styling and annotation. Which is quite likely a serviceable
+plain text rendering of your draft work.
 
 Various command line flags are available to select other meaningful
 bits of text. For example:
@@ -36,6 +37,12 @@ Content from the research folder:
 
 ```
 scry proj.scrivx -r
+```
+
+Synopses from the draft folder:
+
+```
+scry proj.scrivx -s
 ```
 
 To select all top-level binder folders (except trash), use `-A`.
