@@ -10,8 +10,10 @@ use crate::bundle::BinderItemFolder;
 use crate::bundle::Bundle;
 use crate::error::ScryError;
 use crate::rtf;
+use crate::scrivx::BinderItemLocation;
 use crate::scrivx::{BinderItem, BinderItemType, BinderIterator, ScrivenerProject};
 use crate::tag;
+use itertools::Itertools;
 use std::{
     collections::HashSet,
     ffi::OsStr,
@@ -300,11 +302,11 @@ impl<'a> ExtractionIterator<'a> {
 
     /// Load up the next content iterator
     fn load_content_iterator(&mut self) -> bool {
-        if let Some(item) = self.binder_iterator.next() {
+        if let Some(item_location) = self.binder_iterator.next() {
             self.content_iterator = Some(ContentIterator::new(
-                item.uuid,
-                item.title.clone(),
-                self.bundle.binder_item_content(&item.uuid),
+                item_location.item.uuid,
+                item_location.item.title.clone(),
+                self.bundle.binder_item_content(&item_location.item.uuid),
                 self.content_specs,
             ));
             true
@@ -361,14 +363,21 @@ impl JsonItemiser {
     /// Accept a binder item and massage into JSON object
     pub fn consume_item(
         &mut self,
-        item: &BinderItem,
+        item_location: &BinderItemLocation,
         folder: &BinderItemFolder,
     ) -> Result<(), ScryError> {
         let mut object = JsonValue::new_object();
+        let item = item_location.item;
         // x-scrivener-item links need uppercase GUIDS - might as well
         // ensure it here:
         object.insert("uuid", item.uuid.to_string().to_ascii_uppercase())?;
+        object.insert("title", item.title.clone())?;
         object.insert("type", item.r#type.to_string())?;
+
+        // let's add a path of titles to disambiguate items with
+        // identical names
+        let path = item_location.parents.iter().map(|i| &i.title).join(" >> ");
+        object.insert("parent_path", path)?;
 
         if self.content_specs.contains(&ContentSpec::Title) {
             object.insert("title", item.title.clone())?;

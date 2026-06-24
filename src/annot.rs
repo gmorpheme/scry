@@ -67,7 +67,7 @@ impl<T: Iterator<Item = String>> AnnotationAdapter<T> {
                 Some(idx) => {
                     self.in_annotation = false;
                     self.source
-                        .put_back((&line[(idx + CLOSE.len())..]).to_string());
+                        .put_back((line[(idx + CLOSE.len())..]).to_string());
                     &line[..idx]
                 }
                 None => line,
@@ -86,7 +86,7 @@ impl<T: Iterator<Item = String>> AnnotationAdapter<T> {
                         .expect("Unsupported: annotation split open across lines");
                     self.in_annotation = true;
                     self.source
-                        .put_back((&line[(end + OPEN_END.len())..]).to_string());
+                        .put_back((line[(end + OPEN_END.len())..]).to_string());
                     &line[..start]
                 }
                 None => line,
