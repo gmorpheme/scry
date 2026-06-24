@@ -148,6 +148,11 @@ impl Opt {
         if self.comments {
             content_specs.insert(ContentSpec::Comments);
         }
+        // Markdown mode always includes content and titles
+        if self.markdown {
+            content_specs.insert(ContentSpec::Content);
+            content_specs.insert(ContentSpec::Title);
+        }
         if content_specs.is_empty() {
             if self.itemise() {
                 content_specs.insert(ContentSpec::Title);
