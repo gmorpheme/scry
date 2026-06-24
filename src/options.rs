@@ -60,6 +60,22 @@ pub struct Opt {
     /// Maintain item structure and UUIDs (not hierarchy)
     #[structopt(short = "I", long)]
     itemise: bool,
+
+    /// Output as structured Markdown files
+    #[structopt(long)]
+    markdown: bool,
+
+    /// Output directory for Markdown files (required with --markdown)
+    #[structopt(long = "output-dir", requires = "markdown")]
+    output_dir: Option<PathBuf>,
+
+    /// Split output: one file per item instead of one per top-level folder
+    #[structopt(long, requires = "markdown")]
+    split: bool,
+
+    /// Include bundle path in non-text item placeholders
+    #[structopt(long = "asset-path", requires = "markdown")]
+    asset_path: bool,
 }
 
 impl Opt {
@@ -69,6 +85,22 @@ impl Opt {
 
     pub fn itemise(&self) -> bool {
         self.itemise
+    }
+
+    pub fn markdown(&self) -> bool {
+        self.markdown
+    }
+
+    pub fn output_dir(&self) -> Option<&Path> {
+        self.output_dir.as_deref()
+    }
+
+    pub fn split(&self) -> bool {
+        self.split
+    }
+
+    pub fn asset_path(&self) -> bool {
+        self.asset_path
     }
 
     /// Return the folders to include in the output
@@ -117,7 +149,11 @@ impl Opt {
             content_specs.insert(ContentSpec::Comments);
         }
         if content_specs.is_empty() {
-            content_specs.insert(ContentSpec::Content);
+            if self.itemise() {
+                content_specs.insert(ContentSpec::Title);
+            } else {
+                content_specs.insert(ContentSpec::Content);
+            }
         }
         content_specs
     }
