@@ -44,22 +44,30 @@ fn try_main(opts: &options::Opt) -> Result<()> {
     let bundle = bundle::Bundle::new(directory);
 
     if opts.markdown() {
-        let output_dir = opts.output_dir().ok_or_else(|| {
-            ScryError::CannotLocateBundle // reuse error; --output-dir is required by structopt
-        })?;
+        let output_dir = opts.output_dir().ok_or(ScryError::CannotLocateBundle)?;
         let name = project_name(&project_file);
         let folder_specs = opts.folder_specs();
         let content_specs = opts.content_specs();
 
         if opts.split() {
             markdown::emit_split(
-                &project, &bundle, output_dir, &name,
-                &folder_specs, &content_specs, opts.asset_path(),
+                &project,
+                &bundle,
+                output_dir,
+                &name,
+                &folder_specs,
+                &content_specs,
+                opts.asset_path(),
             )?;
         } else {
             markdown::emit_single_file(
-                &project, &bundle, output_dir, &name,
-                &folder_specs, &content_specs, opts.asset_path(),
+                &project,
+                &bundle,
+                output_dir,
+                &name,
+                &folder_specs,
+                &content_specs,
+                opts.asset_path(),
             )?;
         }
     } else if opts.itemise() {

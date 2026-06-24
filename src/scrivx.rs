@@ -39,7 +39,7 @@ impl ScrivenerProject {
     }
 
     /// An iterator over all items in the project's binder
-    pub fn iter(&self) -> BinderIterator {
+    pub fn iter(&self) -> BinderIterator<'_> {
         BinderIterator::new(self.binder.binder_items.iter().collect())
     }
 
@@ -55,7 +55,7 @@ impl ScrivenerProject {
 }
 
 /// Binder item types
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq)]
 pub enum BinderItemType {
     /// The single draft folder
     DraftFolder,
@@ -74,6 +74,7 @@ pub enum BinderItemType {
     /// Archived web content
     WebArchive,
     /// Other content type
+    #[default]
     Other,
 }
 
@@ -90,12 +91,6 @@ impl fmt::Display for BinderItemType {
             BinderItemType::WebArchive => write!(f, "WebArchive"),
             BinderItemType::Other => write!(f, "Other"),
         }
-    }
-}
-
-impl Default for BinderItemType {
-    fn default() -> Self {
-        BinderItemType::Other
     }
 }
 
@@ -193,7 +188,7 @@ pub struct BinderItem {
 
 impl BinderItem {
     /// Iterate over this item and its descendents
-    pub fn iter(&self) -> BinderIterator {
+    pub fn iter(&self) -> BinderIterator<'_> {
         BinderIterator::new_from_root(self)
     }
 }
@@ -207,7 +202,7 @@ pub struct Binder {
 
 impl Binder {
     /// An iterator over all items in the binder
-    pub fn iter(&self) -> BinderIterator {
+    pub fn iter(&self) -> BinderIterator<'_> {
         BinderIterator::new(self.binder_items.iter().collect())
     }
 }

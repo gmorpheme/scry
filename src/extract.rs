@@ -54,7 +54,7 @@ fn matches(item: &BinderItem, folder_spec: &FolderSpec) -> bool {
 pub fn binder_iterator(
     project: &ScrivenerProject,
     folder_specs: HashSet<FolderSpec>,
-) -> BinderIterator {
+) -> BinderIterator<'_> {
     let roots: Vec<_> = project
         .binder
         .binder_items
@@ -264,7 +264,7 @@ impl Extractor {
     }
 
     /// Return an iterator over all selected content
-    pub fn iter(&self) -> ExtractionIterator {
+    pub fn iter(&self) -> ExtractionIterator<'_> {
         ExtractionIterator::new(
             &self.bundle,
             binder_iterator(&self.project, self.folder_specs.clone()),

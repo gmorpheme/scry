@@ -6,8 +6,8 @@
 
 use crate::annot;
 use crate::bundle::Bundle;
-use crate::extract::{ContentSpec, FolderSpec};
 use crate::error::Result;
+use crate::extract::{ContentSpec, FolderSpec};
 use crate::rtf;
 use crate::scrivx::{BinderItem, BinderItemType, ScrivenerProject};
 use crate::tag;
@@ -80,7 +80,12 @@ fn asset_placeholder(item: &BinderItem, bundle: &Bundle, include_path: bool) -> 
 
     if include_path {
         let folder = bundle.binder_item_folder(&item.uuid);
-        format!("<!-- [{}: {} ({})] -->", type_label, item.title, folder.display())
+        format!(
+            "<!-- [{}: {} ({})] -->",
+            type_label,
+            item.title,
+            folder.display()
+        )
     } else {
         format!("<!-- [{}: {}] -->", type_label, item.title)
     }
@@ -126,7 +131,11 @@ fn emit_item(
         if let Some(path) = folder.synopsis() {
             if let Ok(file) = File::open(path) {
                 let mut content = String::new();
-                if io::BufReader::new(file).read_to_string(&mut content).is_ok() && !content.trim().is_empty() {
+                if io::BufReader::new(file)
+                    .read_to_string(&mut content)
+                    .is_ok()
+                    && !content.trim().is_empty()
+                {
                     lines.push(synopsis_comment(&content));
                     lines.push(String::new());
                 }
@@ -157,9 +166,7 @@ fn emit_item(
         if let Some(path) = folder.notes() {
             if path.extension() == Some(OsStr::new("rtf")) {
                 if let Ok(paragraphs) = rtf::parse_rtf_file(path) {
-                    let note_lines: Vec<String> = paragraphs
-                        .filter(|s| !s.is_empty())
-                        .collect();
+                    let note_lines: Vec<String> = paragraphs.filter(|s| !s.is_empty()).collect();
                     let has_notes = !note_lines.is_empty();
                     for line in note_lines {
                         lines.push(note_comment(&line));
